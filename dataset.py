@@ -1,14 +1,47 @@
 from pathlib import Path
 from robustbench.data import load_cifar10c
-from torch.utils.data import DataLoader, Subset, TensorDataset
+from torch.utils.data import Subset, TensorDataset
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
-from torch.utils.data import random_split
-import torchvision
 import numpy as np
+from omegaconf import DictConfig
+from typing import Tuple
 
 
-def get_loaders(cfg, corruption_type, severity):
+
+def get_loaders(
+        cfg: DictConfig, corruption_type: str, severity: int
+    ) -> Tuple[TensorDataset, TensorDataset, TensorDataset]:
+    """
+    Retrieve train, validation, and test datasets for CIFAR-10-C or ImageNet-C.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Configuration object containing dataset parameters.
+        - data.dataset_name : str
+            Name of the dataset ('cifar10' or 'imagenet-c').
+        - args.train_n : int
+            Number of training examples per class.
+        - user.root_dir : str
+            Root directory for dataset storage.
+        - args.batch_size : int
+            Batch size for data loaders.
+        - args.num_workers : int
+            Number of workers for data loading.
+    corruption_type : str
+        Type of corruption to apply
+        (e.g., 'gaussian_noise', 'shot_noise').
+    severity : int
+        Severity level of the corruption (1-5).
+
+    Returns
+    -------
+    Tuple[TensorDataset, TensorDataset, TensorDataset]
+        - Train dataset
+        - Validation dataset
+        - Test dataset
+    """
     if cfg.data.dataset_name == "cifar10":
         x_corr, y_corr = load_cifar10c(
             10000, severity, cfg.user.root_dir, False, [corruption_type]
@@ -39,7 +72,6 @@ def get_loaders(cfg, corruption_type, severity):
         data_root = Path(cfg.user.root_dir)
         image_dir = data_root / "ImageNet-C" / corruption_type / str(severity)
         dataset = ImageFolder(image_dir, transform=transforms.ToTensor())
-        indices = list(range(len(dataset.imgs))) #50k examples --> 50 per class
         assert cfg.args.train_n <= 20000
         labels = {}
         y_corr = dataset.targets
@@ -61,4 +93,4 @@ def get_loaders(cfg, corruption_type, severity):
         val_dataset = Subset(dataset, val_idxs)
         te_dataset = Subset(dataset, test_idxs)
 
-    
+    return tr_dataset, val_dataset, te_dataset

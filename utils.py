@@ -6,7 +6,11 @@ import torch
 import wandb
 
 
-def set_seed_everywhere(seed):
+def set_seed_everywhere(seed: int):
+    """
+    Set the random seed for reproducibility across
+    numpy, torch, and random libraries.
+    """
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)

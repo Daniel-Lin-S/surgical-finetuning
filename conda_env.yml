@@ -8,12 +8,12 @@ dependencies:
   - pyparsing=2.4.7
   - jupyterlab=3.0.14
   - scikit-image=0.18.1
-  - nvidia::cudatoolkit=10.2
-  - pytorch::pytorch
-  - pytorch::torchvision
-  - pytorch::torchaudio
+  - cudatoolkit=10.2
   - pip:
     - wandb
+    - pytorch
+    - torchaudio
+    - torchvision
     - numpy==1.22.2
     - termcolor==1.1.0
     - tensorboard==2.8.0
